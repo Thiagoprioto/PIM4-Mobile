@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PIM4App.ViewModels"
+             x:DataType="vm:PerfilViewModel"
+             x:Class="PIM4App.Views.PerfilPage"
+             Title="Meu Perfil">
+
+    <VerticalStackLayout Padding="20" Spacing="10" 
+                         VerticalOptions="Center" HorizontalOptions="Center">
+
+        <Label 
+            Text="Bem-vindo ao PIM 4!"
+            FontSize="22"
+            HorizontalOptions="Center" />
+
+        <Label 
+            Text="Logado como: Aluno (Simulado)"
+            FontSize="16"
+            HorizontalOptions="Center" 
+            Margin="0,0,0,30" />
+
+        <Button 
+            Text="Sair (Logout)"
+            Command="{Binding LogoutCommand}"
+            BackgroundColor="DarkRed"
+            TextColor="White"
+            HorizontalOptions="Fill" />
+
+    </VerticalStackLayout>
+
+</ContentPage>

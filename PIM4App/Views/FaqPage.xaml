@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PIM4App.ViewModels"
+             xmlns:models="clr-namespace:PIM4App.Models"
+             x:DataType="vm:FaqViewModel"
+             x:Class="PIM4App.Views.FaqPage"
+             Title="Assistente IA">
+
+    <Grid RowDefinitions="*, Auto" Padding="10" RowSpacing="10">
+
+        <CollectionView Grid.Row="0"
+                        ItemsSource="{Binding Mensagens}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ChatMessage">
+                    <VerticalStackLayout Padding="5">
+                        <Label Text="{Binding Autor}" FontAttributes="Bold" TextColor="Purple"/>
+                        <Frame CornerRadius="10" Padding="10" BorderColor="LightGray" BackgroundColor="#F0F0F0">
+                            <Label Text="{Binding Texto}" TextColor="Black" />
+                        </Frame>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*, Auto" ColumnSpacing="10">
+            <Frame Grid.Column="0" CornerRadius="20" Padding="0" BorderColor="Purple" HasShadow="False">
+                <Entry Placeholder="Digite sua dúvida..."
+                       Text="{Binding MensagemDigitada}"
+                       Margin="10,0"
+                       VerticalOptions="Center" />
+            </Frame>
+
+            <Button Grid.Column="1"
+                    Text="Enviar"
+                    Command="{Binding EnviarMensagemCommand}"
+                    VerticalOptions="Center"
+                    BackgroundColor="Purple"
+                    TextColor="White"
+                    CornerRadius="20" />
+        </Grid>
+
+    </Grid>
+</ContentPage>

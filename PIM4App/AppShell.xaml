@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="PIM4App.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:PIM4App.Views"
+    Shell.FlyoutBehavior="Disabled"
+    Title="PIM4App">
+
+    <ShellContent
+        Title="Login"
+        ContentTemplate="{DataTemplate views:LoginPage}"
+        Route="LoginPage" />
+
+    <TabBar Route="MainAppTabs">
+        <ShellContent
+            Title="Chamados"
+            ContentTemplate="{DataTemplate views:ChamadosPage}"
+            Route="ChamadosPage" 
+            Icon="dotnet_bot.png" />
+        <ShellContent
+            Title="Assistente IA"
+            ContentTemplate="{DataTemplate views:FaqPage}"
+            Route="FaqPage"
+            Icon="dotnet_bot.png" />
+        <ShellContent
+            Title="Perfil"
+            ContentTemplate="{DataTemplate views:PerfilPage}"
+            Route="PerfilPage"
+            Icon="dotnet_bot.png" />
+    </TabBar>
+
+</Shell>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PIM4App.ViewModels"
+             xmlns:model="clr-namespace:PIM4App.Models"
+             x:DataType="vm:ChamadosViewModel"
+             x:Class="PIM4App.Views.ChamadosPage"
+             Title="Meus Chamados">
+
+    <Grid RowDefinitions="*, Auto">
+
+        <CollectionView Grid.Row="0"
+                        ItemsSource="{Binding Chamados}"
+                        EmptyView="Nenhum chamado encontrado."
+                        SelectionMode="Single"
+                        SelectionChangedCommand="{Binding SelecionarChamadoCommand}"
+                        SelectionChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=SelectedItem}">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:Chamado">
+                    <Frame Margin="10" Padding="15" CornerRadius="10" BorderColor="LightGray">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ChamadosViewModel}}, Path=SelecionarChamadoCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Frame.GestureRecognizers>
+
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="{Binding Titulo}" FontSize="18" FontAttributes="Bold" />
+                            <Label Text="{Binding Categoria}" FontAttributes="Italic" TextColor="DarkSlateGray" FontSize="14"/>
+                            <Label Text="{Binding Status, StringFormat='Status: {0}'}" />
+                            <Label Text="{Binding DataAbertura, StringFormat='Aberto em: {0:dd/MM/yyyy}'}" FontSize="12" TextColor="Gray" />
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <HorizontalStackLayout Grid.Row="1" Padding="10" Spacing="10" HorizontalOptions="FillAndExpand">
+            <Button Text="Abrir Novo Chamado"
+                    Command="{Binding IrParaNovoChamadoCommand}"
+                    HorizontalOptions="FillAndExpand" />
+        </HorizontalStackLayout>
+
+    </Grid>
+
+</ContentPage>
