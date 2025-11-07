@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PIM4App.ViewModels"
+             xmlns:model="clr-namespace:PIM4App.Models"
+             x:DataType="vm:TecnicoDashboardViewModel"
+             x:Class="PIM4App.Views.TecnicoDashboardPage"
+             Title="Painel do Técnico"
+             BackgroundColor="#f0f0f0">
+
+    <Grid RowDefinitions="Auto, *">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="15" BackgroundColor="DarkSlateBlue">
+            <Label Grid.Column="0" Text="Visão Geral de Chamados" TextColor="White" FontSize="18" VerticalOptions="Center" FontAttributes="Bold"/>
+            <Button Grid.Column="1" Text="Sair" Command="{Binding LogoutCommand}" HeightRequest="35" FontSize="12" BackgroundColor="DarkRed" TextColor="White"/>
+        </Grid>
+
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding TodosChamados}"
+                        Margin="10"
+                        SelectionMode="Single"
+                        SelectionChangedCommand="{Binding SelecionarChamadoCommand}"
+                        SelectionChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=SelectedItem}">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:Chamado">
+                    <Frame Margin="5" Padding="15" CornerRadius="8" BorderColor="Gray" BackgroundColor="White">
+                        <Frame.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TecnicoDashboardViewModel}}, Path=SelecionarChamadoCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Frame.GestureRecognizers>
+
+                        <Grid ColumnDefinitions="*, Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="{Binding Titulo}" FontAttributes="Bold" FontSize="16" TextColor="Black"/>
+                                <Label Text="{Binding Categoria}" FontSize="12" TextColor="DarkBlue" FontAttributes="Italic"/>
+                                <Label Text="{Binding DataAbertura, StringFormat='Aberto em: {0:dd/MM HH:mm}'}" FontSize="11" TextColor="Gray"/>
+                            </VerticalStackLayout>
+
+                            <Label Grid.Column="1" Text="{Binding Status}" VerticalOptions="Center" FontAttributes="Bold" TextColor="DarkSlateGray"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+
+</ContentPage>

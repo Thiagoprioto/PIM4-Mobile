@@ -29,5 +29,9 @@
             Route="PerfilPage"
             Icon="dotnet_bot.png" />
     </TabBar>
+    <ShellContent
+        Title="Painel Técnico"
+        ContentTemplate="{DataTemplate views:TecnicoDashboardPage}"
+        Route="TecnicoDashboardPage" />
 
 </Shell>

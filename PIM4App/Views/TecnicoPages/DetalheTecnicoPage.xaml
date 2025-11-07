@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:PIM4App.ViewModels"
+             x:DataType="vm:DetalheTecnicoViewModel"
+             x:Class="PIM4App.Views.DetalheTecnicoPage"
+             Title="Gerenciar Chamado"
+             BackgroundColor="#f0f0f0">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+
+            <Frame BackgroundColor="White" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="{Binding Chamado.Titulo}" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                    <Label Text="{Binding Chamado.Status, StringFormat='Status Atual: {0}'}" TextColor="DarkSlateBlue" FontAttributes="Bold"/>
+                    <Label Text="{Binding Chamado.IdTecnicoResponsavel, StringFormat='Técnico Responsável: {0}', TargetNullValue='Técnico Responsável: (Nenhum)'}" 
+                           TextColor="Gray" FontSize="12"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <Label Text="Descrição do Usuário:" FontAttributes="Bold" Margin="5,10,0,0"/>
+            <Frame BackgroundColor="White" Padding="15" CornerRadius="10">
+                <Label Text="{Binding Chamado.Descricao}" />
+            </Frame>
+
+            <Button Text="🤖 Pedir Análise da IA" 
+                    Command="{Binding PedirAjudaIACommand}"
+                    BackgroundColor="DarkSlateBlue"
+                    Margin="0,15,0,0" />
+
+            <Frame BackgroundColor="#E8EAF6" 
+                   Padding="15" 
+                   CornerRadius="10" 
+                   IsVisible="{Binding SugestaoVisivel}"
+                   BorderColor="DarkSlateBlue">
+                <Label Text="{Binding SugestaoIA}" TextColor="DarkSlateBlue"/>
+            </Frame>
+            <Label Text="Ações Disponíveis:" FontAttributes="Bold" Margin="5,20,0,0"/>
+
+            <Button Text="🙋‍♂️ Assumir Chamado" 
+                    Command="{Binding AssumirCommand}"
+                    BackgroundColor="DarkBlue"
+                    HeightRequest="50"/>
+
+            <Button Text="✅ Finalizar Chamado" 
+                    Command="{Binding FinalizarCommand}"
+                    BackgroundColor="Green"
+                    HeightRequest="50"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

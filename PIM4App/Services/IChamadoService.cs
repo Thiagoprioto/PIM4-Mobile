@@ -9,10 +9,16 @@ namespace PIM4App.Services
 {
     public interface IChamadoService
     {
-        // Contrato para buscar a lista de chamados do usuário
         Task<List<Chamado>> GetMeusChamadosAsync();
 
-        // Contrato para abrir um novo chamado
+        // NOVO MÉTODO: Para o técnico ver tudo
+        Task<List<Chamado>> GetTodosChamadosAsync();
+
         Task AbrirNovoChamadoAsync(Chamado novoChamado);
+
+        Task AssumirChamadoAsync(int chamadoId, int tecnicoId);
+        Task MudarStatusChamadoAsync(int chamadoId, string novoStatus);
+
+        Task<string> ObterSugestaoIAAsync(int chamadoId);
     }
 }

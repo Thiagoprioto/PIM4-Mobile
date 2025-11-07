@@ -1,28 +1,25 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PIM4App.Services;
+using PIM4App.Views; // Necessário para saber o nome das páginas de destino
 
 namespace PIM4App.ViewModels
 {
-    // [ObservableObject] vem do CommunityToolkit e nos ajuda a notificar a tela
     public partial class LoginViewModel : ObservableObject
     {
         private readonly IAuthService _authService;
 
-        // [ObservableProperty] cria as propriedades 'Username' e 'Password'
         [ObservableProperty]
         private string _username;
 
         [ObservableProperty]
         private string _password;
 
-        // Pedimos o serviço de login no construtor
         public LoginViewModel(IAuthService authService)
         {
             _authService = authService;
         }
 
-        // [RelayCommand] cria um 'LoginCommand' para o botão da tela
         [RelayCommand]
         private async Task LoginAsync()
         {
@@ -34,13 +31,20 @@ namespace PIM4App.ViewModels
 
             try
             {
-                bool success = await _authService.LoginAsync(Username, Password);
+                string perfilUsuario = await _authService.LoginAsync(Username, Password);
 
-                if (success)
+                if (perfilUsuario != null)
                 {
-                    // Sucesso! Navega para a página de chamados
-                    // O PIM pede que o app permita abrir chamados [cite: 56]
-                    await Shell.Current.GoToAsync("//MainAppTabs");
+                    if (perfilUsuario == "Tecnico")
+                    {
+                        // PORTA 1: Só para Técnicos
+                        await Shell.Current.GoToAsync($"//{nameof(TecnicoDashboardPage)}");
+                    }
+                    else
+                    {
+                        // PORTA 2: Para todos os outros (Alunos/Colaboradores)
+                        await Shell.Current.GoToAsync("//MainAppTabs");
+                    }
                 }
                 else
                 {

@@ -67,16 +67,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Views\NovoChamadoPage.xaml.cs">
+	  <Compile Update="Views\UsuarioPages\NovoChamadoPage.xaml.cs">
 	    <DependentUpon>NovoChamadoPage.xaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="Views\ChamadosPage.xaml">
+	  <MauiXaml Update="Views\UsuarioPages\ChamadosPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\DetalheChamadoPage.xaml">
+	  <MauiXaml Update="Views\UsuarioPages\DetalheChamadoPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\TecnicoPages\DetalheTecnicoPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\FaqPage.xaml">
@@ -85,10 +88,13 @@
 	  <MauiXaml Update="Views\LoginPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\NovoChamadoPage.xaml">
+	  <MauiXaml Update="Views\UsuarioPages\NovoChamadoPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\PerfilPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\TecnicoPages\TecnicoDashboardPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

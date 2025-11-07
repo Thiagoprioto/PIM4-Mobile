@@ -37,6 +37,8 @@ public static class MauiProgram
         builder.Services.AddTransient<FaqViewModel>();
         builder.Services.AddTransient<DetalheChamadoViewModel>();
         builder.Services.AddTransient<PerfilViewModel>();
+        builder.Services.AddTransient<TecnicoDashboardViewModel>();
+        builder.Services.AddTransient<DetalheTecnicoViewModel>();
 
         // --- Views (Transient = 1 nova a cada vez) ---
         builder.Services.AddTransient<LoginPage>();
@@ -45,6 +47,8 @@ public static class MauiProgram
         builder.Services.AddTransient<FaqPage>();
         builder.Services.AddTransient<DetalheChamadoPage>();
         builder.Services.AddTransient<PerfilPage>();
+        builder.Services.AddTransient<TecnicoDashboardPage>();
+        builder.Services.AddTransient<DetalheTecnicoViewModel>();
 
         return builder.Build();
     }

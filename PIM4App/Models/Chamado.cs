@@ -14,5 +14,8 @@ namespace PIM4App.Models
         public DateTime DataAbertura { get; set; }
         public string Status { get; set; }
         public string Categoria { get; set; }
+
+        // NOVO CAMPO: ID do técnico que assumiu (pode ser nulo)
+        public int? IdTecnicoResponsavel { get; set; }
     }
 }

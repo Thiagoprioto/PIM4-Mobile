@@ -4,7 +4,6 @@ namespace PIM4App.Services
 {
     public class FaqService : IFaqService
     {
-        // Esta é a nossa nova "IA" simulada
         public async Task<string> ObterRespostaSimuladaAsync(string pergunta)
         {
             await Task.Delay(500); // Simula o processamento

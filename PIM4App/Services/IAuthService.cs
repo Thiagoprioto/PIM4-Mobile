@@ -8,7 +8,8 @@ namespace PIM4App.Services
 {
     public interface IAuthService
     {
-        // Contrato que simula o login (pedido no seu PIM)
-        Task<bool> LoginAsync(string username, string password);
+        // Agora retorna uma string com o perfil (ex: "Tecnico", "Usuario")
+        // ou null se o login falhar.
+        Task<string> LoginAsync(string username, string password);
     }
 }

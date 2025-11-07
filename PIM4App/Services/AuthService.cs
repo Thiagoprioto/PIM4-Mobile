@@ -9,18 +9,25 @@ namespace PIM4App.Services
 {
     public class AuthService : IAuthService
     {
-        public async Task<bool> LoginAsync(string username, string password)
+        public async Task<string> LoginAsync(string username, string password)
         {
-            // SIMULAÇÃO: No seu PIM, aqui você chamaria sua API ASP.NET 
+            // SIMULAÇÃO: No seu PIM real, isso viria da API ASP.NET
             await Task.Delay(1000); // Simula espera da rede
 
-            // Simula um login de teste
+            // Login de USUÁRIO comum
             if (username.ToLower() == "aluno" && password == "12345")
             {
-                return true; // Sucesso
+                return "Usuario";
             }
 
-            return false; // Falha
+            // Login de TÉCNICO
+            if (username.ToLower() == "tecnico" && password == "admin")
+            {
+                return "Tecnico";
+            }
+
+            // Login falhou
+            return null;
         }
     }
 }

@@ -18,15 +18,11 @@ namespace PIM4App.ViewModels
         {
             _chamadoService = chamadoService;
             _chamados = new ObservableCollection<Chamado>();
-
-            // CORREÇÃO: Removemos o carregamento daqui.
-            // A tela (View) vai chamar o comando "Carregar" agora.
         }
 
         [RelayCommand]
         private async Task CarregarChamadosAsync()
         {
-            // Busca os dados do nosso serviço simulado
             var lista = await _chamadoService.GetMeusChamadosAsync();
 
             Chamados.Clear();
@@ -49,10 +45,6 @@ namespace PIM4App.ViewModels
             if (chamado == null)
                 return;
 
-            // Navega para a página de Detalhe, passando o objeto 'chamado'
-            // como um parâmetro de navegação.
-            // O [QueryProperty] que criamos na DetalheChamadoViewModel
-            // vai "capturar" este objeto.
             await Shell.Current.GoToAsync(nameof(DetalheChamadoPage), new Dictionary<string, object>
             {
                 { "Chamado", chamado }
