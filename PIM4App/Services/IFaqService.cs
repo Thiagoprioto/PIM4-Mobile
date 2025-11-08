@@ -1,10 +1,11 @@
-﻿using PIM4App.Models;
+﻿using PIM4App.DTO;
+using PIM4App.Models;
 
 
 namespace PIM4App.Services
 {
     public interface IFaqService
     {
-        Task<string> ObterRespostaSimuladaAsync(string pergunta);
+        Task<IaResponse> EnviarMensagemAsync(ChatRequest request);
     }
 }

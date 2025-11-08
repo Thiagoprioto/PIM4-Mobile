@@ -3,6 +3,8 @@ using CommunityToolkit.Maui;
 using PIM4App.Services;
 using PIM4App.ViewModels;
 using PIM4App.Views;
+using System.Net.Http;
+using Microsoft.Extensions.Http;
 
 namespace PIM4App;
 
@@ -24,6 +26,10 @@ public static class MauiProgram
         // REGISTRO DE TODOS OS NOSSOS ARQUIVOS
         // (Esta parte já estava correta no seu código)
         // =================================================================
+
+
+        //conexão com o n8n
+        builder.Services.AddHttpClient();
 
         // --- Serviços (Singleton = 1 por app) ---
         builder.Services.AddSingleton<IAuthService, AuthService>();
@@ -48,7 +54,7 @@ public static class MauiProgram
         builder.Services.AddTransient<DetalheChamadoPage>();
         builder.Services.AddTransient<PerfilPage>();
         builder.Services.AddTransient<TecnicoDashboardPage>();
-        builder.Services.AddTransient<DetalheTecnicoViewModel>();
+        builder.Services.AddTransient<DetalheTecnicoPage>();
 
         return builder.Build();
     }

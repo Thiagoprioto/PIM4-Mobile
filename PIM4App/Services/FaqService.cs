@@ -1,34 +1,56 @@
-﻿using PIM4App.Models;
+﻿using PIM4App.Models; // Para o ChatMessage
+using PIM4App.Services;
+using PIM4App.DTO; // Importa os DTOs que você criou
+using System.Net.Http.Json; // Para PostAsJsonAsync e ReadFromJsonAsync
+using System.Text.Json; // Para opções do JsonSerializer
 
 namespace PIM4App.Services
 {
     public class FaqService : IFaqService
     {
-        public async Task<string> ObterRespostaSimuladaAsync(string pergunta)
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        // ==========================================================
+        //         A URL DO SEU BACKEND (API)
+        // =ANOTE O SEU NÚMERO DE PORTA CORRETO (veja no Swagger)=
+        // ==========================================================
+        // Usamos 10.0.2.2 em vez de localhost para o Emulador Android
+        private const string BACKEND_API_URL = "http://10.0.2.2:5043"; // <<< VERIFIQUE SUA PORTA (ex: 7052)
+
+
+        public FaqService(IHttpClientFactory httpClientFactory)
         {
-            await Task.Delay(500); // Simula o processamento
+            _httpClientFactory = httpClientFactory;
+        }
 
-            string resposta;
-            pergunta = pergunta.ToLower();
+        // Esta é a implementação REAL
+        public async Task<IaResponse> EnviarMensagemAsync(ChatRequest request)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                string apiUrl = $"{BACKEND_API_URL}/api/ia/chat";
 
-            if (pergunta.Contains("impressora"))
-            {
-                resposta = "Entendido. Se a impressora não funciona:\n1. Verifique se está ligada.\n2. Verifique se há papel.\n3. Tente reiniciar o computador.";
-            }
-            else if (pergunta.Contains("senha"))
-            {
-                resposta = "Para resetar sua senha, use o portal Web e clique em 'Esqueci minha senha'.";
-            }
-            else if (pergunta.Contains("lento"))
-            {
-                resposta = "Se o computador está lento, tente fechar programas desnecessários e reiniciá-lo.";
-            }
-            else
-            {
-                resposta = "Desculpe, não entendi sua pergunta. Vou registrar sua dúvida para um técnico. Você também pode tentar abrir um chamado na aba 'Chamados'.";
-            }
+                // 1. Envia o 'request' (com a pergunta) para o seu Backend
+                HttpResponseMessage response = await client.PostAsJsonAsync(apiUrl, request);
 
-            return resposta;
+                if (response.IsSuccessStatusCode)
+                {
+                    // 2. Lê a 'IaResponse' (com a resposta) que o Backend enviou
+                    var iaResponse = await response.Content.ReadFromJsonAsync<IaResponse>();
+                    return iaResponse;
+                }
+                else
+                {
+                    // Se o backend der erro (ex: 500), retorna uma mensagem de erro
+                    return new IaResponse { Resposta = "Desculpe, não consegui me conectar ao assistente. Tente mais tarde." };
+                }
+            }
+            catch (Exception ex)
+            {
+                // Se o app não conseguir nem "ligar" (ex: URL errada, sem internet)
+                return new IaResponse { Resposta = $"Erro de conexão: {ex.Message}" };
+            }
         }
     }
 }
