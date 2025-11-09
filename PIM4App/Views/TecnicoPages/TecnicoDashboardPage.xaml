@@ -34,11 +34,13 @@
                         <Grid ColumnDefinitions="*, Auto">
                             <VerticalStackLayout Grid.Column="0" Spacing="2">
                                 <Label Text="{Binding Titulo}" FontAttributes="Bold" FontSize="16" TextColor="Black"/>
-                                <Label Text="{Binding Categoria}" FontSize="12" TextColor="DarkBlue" FontAttributes="Italic"/>
+
+                                <Label Text="{Binding IdCategoria, StringFormat='Categoria ID: {0}'}" FontSize="12" TextColor="DarkBlue" FontAttributes="Italic"/>
+
                                 <Label Text="{Binding DataAbertura, StringFormat='Aberto em: {0:dd/MM HH:mm}'}" FontSize="11" TextColor="Gray"/>
                             </VerticalStackLayout>
 
-                            <Label Grid.Column="1" Text="{Binding Status}" VerticalOptions="Center" FontAttributes="Bold" TextColor="DarkSlateGray"/>
+                            <Label Grid.Column="1" Text="{Binding IdStatus, StringFormat='Status ID: {0}'}" VerticalOptions="Center" FontAttributes="Bold" TextColor="DarkSlateGray"/>
                         </Grid>
                     </Frame>
                 </DataTemplate>

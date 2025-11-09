@@ -2,52 +2,87 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PIM4App.ViewModels"
+             xmlns:dto="clr-namespace:PIM4App.DTO"
              x:DataType="vm:DetalheTecnicoViewModel"
              x:Class="PIM4App.Views.DetalheTecnicoPage"
              Title="Gerenciar Chamado"
              BackgroundColor="#f0f0f0">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="15">
+    <Grid RowDefinitions="*, Auto">
 
-            <Frame BackgroundColor="White" Padding="15" CornerRadius="10">
-                <VerticalStackLayout Spacing="5">
-                    <Label Text="{Binding Chamado.Titulo}" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                    <Label Text="{Binding Chamado.Status, StringFormat='Status Atual: {0}'}" TextColor="DarkSlateBlue" FontAttributes="Bold"/>
-                    <Label Text="{Binding Chamado.IdTecnicoResponsavel, StringFormat='Técnico Responsável: {0}', TargetNullValue='Técnico Responsável: (Nenhum)'}" 
-                           TextColor="Gray" FontSize="12"/>
-                </VerticalStackLayout>
-            </Frame>
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="20" Spacing="15">
 
-            <Label Text="Descrição do Usuário:" FontAttributes="Bold" Margin="5,10,0,0"/>
-            <Frame BackgroundColor="White" Padding="15" CornerRadius="10">
-                <Label Text="{Binding Chamado.Descricao}" />
-            </Frame>
+                <Frame BackgroundColor="White" Padding="15" CornerRadius="10">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="{Binding Chamado.Titulo}" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                        <Label Text="{Binding Chamado.IdStatus, StringFormat='Status ID: {0}'}" TextColor="DarkSlateBlue" FontAttributes="Bold"/>
+                        <Label Text="{Binding Chamado.IdTecnicoResponsavel, StringFormat='Técnico Responsável: {0}', TargetNullValue='Técnico Responsável: (Nenhum)'}" 
+                               TextColor="Gray" FontSize="12"/>
+                    </VerticalStackLayout>
+                </Frame>
 
-            <Button Text="🤖 Pedir Análise da IA" 
-                    Command="{Binding PedirAjudaIACommand}"
-                    BackgroundColor="DarkSlateBlue"
-                    Margin="0,15,0,0" />
+                <Label Text="Descrição do Usuário:" FontAttributes="Bold" Margin="5,10,0,0"/>
+                <Frame BackgroundColor="White" Padding="15" CornerRadius="10">
+                    <Label Text="{Binding Chamado.Descricao}" />
+                </Frame>
 
-            <Frame BackgroundColor="#E8EAF6" 
-                   Padding="15" 
-                   CornerRadius="10" 
-                   IsVisible="{Binding SugestaoVisivel}"
-                   BorderColor="DarkSlateBlue">
-                <Label Text="{Binding SugestaoIA}" TextColor="DarkSlateBlue"/>
-            </Frame>
-            <Label Text="Ações Disponíveis:" FontAttributes="Bold" Margin="5,20,0,0"/>
+                <Label Text="Histórico de Interações:" FontAttributes="Bold" Margin="5,20,0,0"/>
 
-            <Button Text="🙋‍♂️ Assumir Chamado" 
-                    Command="{Binding AssumirCommand}"
-                    BackgroundColor="DarkBlue"
-                    HeightRequest="50"/>
+                <CollectionView ItemsSource="{Binding Interacoes}"
+                                EmptyView="Sem comentários internos.">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="dto:InteracaoDTO">
+                            <Frame BackgroundColor="#F0F0F0" Padding="10" CornerRadius="5" Margin="0,5,0,5">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{Binding IdAutor, StringFormat='Técnico {0}'}" FontAttributes="Bold" FontSize="12"/>
+                                    <Label Text="{Binding Mensagem}" FontSize="14"/>
+                                    <Label Text="{Binding DataInteracao, StringFormat='{0:dd/MM/yyyy HH:mm}'}" TextColor="Gray" FontSize="10" HorizontalOptions="End"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
 
-            <Button Text="✅ Finalizar Chamado" 
-                    Command="{Binding FinalizarCommand}"
-                    BackgroundColor="Green"
-                    HeightRequest="50"/>
+            </VerticalStackLayout>
+        </ScrollView>
 
-        </VerticalStackLayout>
-    </ScrollView>
+        <!-- Substitua VerticalStackLayout por Frame para suportar BorderWidth e BorderColor -->
+        <Frame Grid.Row="1" Padding="0" BackgroundColor="Transparent" BorderColor="LightGray" CornerRadius="10" HasShadow="False">
+            <VerticalStackLayout Padding="15" Spacing="10" BackgroundColor="White">
+                <Label Text="Adicionar Comentário Interno" FontAttributes="Bold" FontSize="14"/>
+
+                <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10">
+                    <Entry Grid.Column="0" 
+                            Placeholder="Nota para a equipe técnica..."
+                            Text="{Binding NovoComentario}"
+                            IsEnabled="{Binding IsNotBusy}" />
+
+                    <Button Grid.Column="1"
+                             Text="Enviar"
+                             Command="{Binding AdicionarComentarioCommand}"
+                             IsEnabled="{Binding IsNotBusy}"
+                             BackgroundColor="DarkSlateBlue" />
+                </Grid>
+
+                <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
+                    <Button Grid.Column="0"
+                             Text="🙋‍♂️ Assumir Chamado" 
+                             Command="{Binding AssumirCommand}"
+                             BackgroundColor="DarkBlue"
+                             HeightRequest="45"
+                             IsEnabled="{Binding IsNotBusy}" />
+
+                    <Button Grid.Column="1"
+                             Text="✅ Finalizar Chamado" 
+                             Command="{Binding FinalizarCommand}"
+                             BackgroundColor="Green"
+                             HeightRequest="45"
+                             IsEnabled="{Binding IsNotBusy}" />
+                </Grid>
+            </VerticalStackLayout>
+        </Frame>
+
+    </Grid>
+
 </ContentPage>

@@ -1,85 +1,213 @@
-﻿using PIM4App.Models;
+﻿using PIM4App.DTO;
+using PIM4App.Models;
+using System.Net.Http.Headers; // Para o Token (Bearer)
+using System.Net.Http.Json;
+using System.Text.Json;
+using CommunityToolkit.Maui.Storage; // Para o SecureStorage
 
 namespace PIM4App.Services
 {
     public class ChamadoService : IChamadoService
     {
-        // 'static' é VITAL aqui para a simulação funcionar entre telas diferentes
-        private static List<Chamado> _listaDeChamadosSimulada = new List<Chamado>
-        {
-            new Chamado { Id = 1, Titulo = "Impressora não funciona", Descricao = "Sem tinta.", DataAbertura = DateTime.Now.AddDays(-2), Status = "Aberto", Categoria = "Erro Técnico" },
-            new Chamado { Id = 2, Titulo = "Mouse quebrado", Descricao = "Não clica.", DataAbertura = DateTime.Now.AddDays(-1), Status = "Em Andamento", Categoria = "Problema de Hardware" },
-            new Chamado { Id = 3, Titulo = "SISTEMA FORA DO AR", Descricao = "Ninguém consegue acessar o ERP.", DataAbertura = DateTime.Now, Status = "Aberto", Categoria = "Erro de Sistema" }
-        };
+        private readonly IHttpClientFactory _httpClientFactory;
+        private const string BACKEND_API_URL = "http://10.0.2.2:5043";
+        private readonly JsonSerializerOptions _jsonOptions;
 
+        public ChamadoService(IHttpClientFactory httpClientFactory)
+        {
+            _httpClientFactory = httpClientFactory;
+            _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        }
+
+        // ==========================================================
+        // FUNÇÃO "MÁGICA": Cria um HttpClient e adiciona o Token
+        // ==========================================================
+        private async Task<HttpClient> CreateAuthenticatedClientAsync()
+        {
+            var client = _httpClientFactory.CreateClient();
+
+            // Pega o Token que o AuthService salvou no "cofre"
+            string token = await SecureStorage.Default.GetAsync("auth_token");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                // Se não houver token, lança um erro (o app deve voltar ao login)
+                throw new Exception("Token de autenticação não encontrado. Faça login novamente.");
+            }
+
+            // Adiciona o Token ao cabeçalho (Header) da requisição
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return client;
+        }
+
+        // ==========================================================
+        // MÉTODOS REAIS (COLABORADOR)
+        // ==========================================================
         public async Task<List<Chamado>> GetMeusChamadosAsync()
         {
-            await Task.Delay(100); // Delay menor para ser mais rápido
-            return _listaDeChamadosSimulada.Take(2).ToList();
+            try
+            {
+                var client = await CreateAuthenticatedClientAsync();
+                string apiUrl = $"{BACKEND_API_URL}/api/Chamados/meus";
+
+                var response = await client.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var chamados = await response.Content.ReadFromJsonAsync<List<Chamado>>(_jsonOptions);
+                    return chamados ?? new List<Chamado>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao buscar MEUS chamados: {ex.Message}");
+            }
+            return new List<Chamado>();
         }
 
+        public async Task AbrirNovoChamadoAsync(NovoChamadoDTO novoChamado)
+        {
+            try
+            {
+                var client = await CreateAuthenticatedClientAsync();
+                string apiUrl = $"{BACKEND_API_URL}/api/Chamados";
+                var response = await client.PostAsJsonAsync(apiUrl, novoChamado);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Erro ao criar chamado: {await response.Content.ReadAsStringAsync()}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao criar chamado: {ex.Message}");
+            }
+        }
+
+        // ==========================================================
+        // MÉTODOS REAIS (TÉCNICO)
+        // ==========================================================
         public async Task<List<Chamado>> GetTodosChamadosAsync()
         {
-            await Task.Delay(100);
-            // CRUCIAL: Retorna uma NOVA lista copiando os dados atuais.
-            // Isso garante que quem pediu receba os dados mais recentes.
-            return new List<Chamado>(_listaDeChamadosSimulada);
-        }
-
-        public async Task AbrirNovoChamadoAsync(Chamado novoChamado)
-        {
-            await Task.Delay(300);
-            novoChamado.Id = _listaDeChamadosSimulada.Count + 1;
-            novoChamado.DataAbertura = DateTime.Now;
-            novoChamado.Status = "Aberto";
-            _listaDeChamadosSimulada.Add(novoChamado);
-        }
-
-        public async Task AssumirChamadoAsync(int chamadoId, int tecnicoId)
-        {
-            // AQUI ESTÁ A MÁGICA: Atualiza a lista ORIGINAL (_listaDeChamadosSimulada)
-            var chamadoReal = _listaDeChamadosSimulada.FirstOrDefault(c => c.Id == chamadoId);
-            if (chamadoReal != null)
+            try
             {
-                chamadoReal.IdTecnicoResponsavel = tecnicoId;
-                chamadoReal.Status = "Em Andamento";
+                var client = await CreateAuthenticatedClientAsync();
+                string apiUrl = $"{BACKEND_API_URL}/api/Chamados/todos";
+
+                var response = await client.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var chamados = await response.Content.ReadFromJsonAsync<List<Chamado>>(_jsonOptions);
+                    return chamados ?? new List<Chamado>();
+                }
             }
-            await Task.CompletedTask;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao buscar TODOS chamados: {ex.Message}");
+            }
+            return new List<Chamado>();
         }
 
-        public async Task MudarStatusChamadoAsync(int chamadoId, string novoStatus)
+        public async Task AssumirChamadoAsync(int chamadoId)
         {
-            var chamadoReal = _listaDeChamadosSimulada.FirstOrDefault(c => c.Id == chamadoId);
-            if (chamadoReal != null)
+            try
             {
-                chamadoReal.Status = novoStatus;
+                var client = await CreateAuthenticatedClientAsync();
+                string apiUrl = $"{BACKEND_API_URL}/api/Chamados/{chamadoId}/assumir";
+                var response = await client.PutAsync(apiUrl, null); // PUT sem corpo
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Erro ao assumir chamado: {await response.Content.ReadAsStringAsync()}");
+                }
             }
-            await Task.CompletedTask;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao assumir chamado: {ex.Message}");
+            }
         }
 
-        // ... dentro da classe ChamadoService
-
-        public async Task<string> ObterSugestaoIAAsync(int chamadoId)
+        public async Task MudarStatusParaFinalizadoAsync(int chamadoId)
         {
-            await Task.Delay(1000); // Simula o tempo de processamento da IA
-
-            var chamado = _listaDeChamadosSimulada.FirstOrDefault(c => c.Id == chamadoId);
-            if (chamado == null) return "Não foi possível analisar este chamado.";
-
-            // Simulação de análise baseada na categoria
-            switch (chamado.Categoria)
+            try
             {
-                case "Erro Técnico":
-                    return "🔍 **Análise da IA:**\nEste parece ser um problema físico. Sugiro verificar cabos, conexões de rede e se o dispositivo está ligado na tomada. Se for impressora, verifique toner e papel.";
-                case "Problema de Hardware":
-                    return "💻 **Análise da IA:**\nFalhas de hardware podem exigir troca de peça. Tente testar o periférico em outra máquina para confirmar se o defeito é no dispositivo ou no computador.";
-                case "Erro de Sistema":
-                    return "⚠️ **Análise da IA:**\nErros de sistema podem afetar múltiplos usuários. Verifique os logs do servidor e se houve alguma atualização recente que possa ter causado o problema.";
-                case "Solicitação de Software":
-                    return "💿 **Análise da IA:**\nVerifique se o usuário tem permissão para o software solicitado e se há licenças disponíveis.";
-                default:
-                    return "🤖 **Análise da IA:**\nNão tenho informações suficientes para esta categoria. Sugiro contatar o usuário para mais detalhes.";
+                var client = await CreateAuthenticatedClientAsync();
+                string apiUrl = $"{BACKEND_API_URL}/api/Chamados/{chamadoId}/finalizar";
+                var response = await client.PutAsync(apiUrl, null);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Erro ao finalizar chamado: {await response.Content.ReadAsStringAsync()}");
+                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao finalizar chamado: {ex.Message}");
+            }
+        }
+
+        public async Task<RespostaIaDTO> ObterSugestaoIAAsync(int chamadoId)
+        {
+            try
+            {
+                var client = await CreateAuthenticatedClientAsync();
+                string apiUrl = $"{BACKEND_API_URL}/api/Chamados/{chamadoId}/sugestaoia";
+
+                var response = await client.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<RespostaIaDTO>(_jsonOptions);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao buscar sugestão IA: {ex.Message}");
+            }
+            return null; // Retorna nulo se der erro
+        }
+        public async Task<List<InteracaoDTO>> GetInteracoesAsync(int chamadoId)
+        {
+            try
+            {
+                var client = await CreateAuthenticatedClientAsync();
+                // Chama o novo endpoint GET /api/Interacoes/1
+                string apiUrl = $"{BACKEND_API_URL}/api/Interacoes/{chamadoId}";
+
+                var response = await client.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var interacoes = await response.Content.ReadFromJsonAsync<List<InteracaoDTO>>(_jsonOptions);
+                    return interacoes ?? new List<InteracaoDTO>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao buscar interações: {ex.Message}");
+            }
+            return new List<InteracaoDTO>(); // Retorna lista vazia se der erro
+        }
+
+        public async Task<InteracaoDTO> AdicionarInteracaoAsync(ComentarioDTO comentario)
+        {
+            try
+            {
+                var client = await CreateAuthenticatedClientAsync();
+                // Chama o novo endpoint POST /api/Interacoes
+                string apiUrl = $"{BACKEND_API_URL}/api/Interacoes";
+
+                var response = await client.PostAsJsonAsync(apiUrl, comentario);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Retorna o comentário que acabou de ser criado
+                    var interacaoCriada = await response.Content.ReadFromJsonAsync<InteracaoDTO>(_jsonOptions);
+                    return interacaoCriada;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao adicionar interação: {ex.Message}");
+            }
+            return null; // Retorna nulo se der erro
         }
     }
 }

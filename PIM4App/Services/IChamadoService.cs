@@ -1,24 +1,20 @@
-﻿using PIM4App.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PIM4App.DTO;
+using PIM4App.Models;
 
 namespace PIM4App.Services
 {
     public interface IChamadoService
     {
+        // Para o Colaborador
         Task<List<Chamado>> GetMeusChamadosAsync();
+        Task AbrirNovoChamadoAsync(NovoChamadoDTO novoChamado);
 
-        // NOVO MÉTODO: Para o técnico ver tudo
+        // Para o Técnico
         Task<List<Chamado>> GetTodosChamadosAsync();
-
-        Task AbrirNovoChamadoAsync(Chamado novoChamado);
-
-        Task AssumirChamadoAsync(int chamadoId, int tecnicoId);
-        Task MudarStatusChamadoAsync(int chamadoId, string novoStatus);
-
-        Task<string> ObterSugestaoIAAsync(int chamadoId);
+        Task AssumirChamadoAsync(int chamadoId);
+        Task MudarStatusParaFinalizadoAsync(int chamadoId); // Nome específico
+        Task<RespostaIaDTO> ObterSugestaoIAAsync(int chamadoId);
+        Task<List<InteracaoDTO>> GetInteracoesAsync(int chamadoId);
+        Task<InteracaoDTO> AdicionarInteracaoAsync(ComentarioDTO comentario);
     }
 }

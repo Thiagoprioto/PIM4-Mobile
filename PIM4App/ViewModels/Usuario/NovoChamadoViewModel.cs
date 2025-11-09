@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using PIM4App.Models;
 using PIM4App.Services;
+using PIM4App.DTO;
 using System.Collections.Generic; // <-- ADICIONE ESTE
 
 namespace PIM4App.ViewModels
@@ -40,23 +41,23 @@ namespace PIM4App.ViewModels
         [RelayCommand]
         private async Task SalvarAsync()
         {
-            // Adicionamos a checagem da Categoria
             if (string.IsNullOrWhiteSpace(Titulo) ||
-                string.IsNullOrWhiteSpace(Descricao) ||
-                string.IsNullOrWhiteSpace(CategoriaSelecionada)) // <-- ADICIONE ESTA LINHA
+                string.IsNullOrWhiteSpace(Descricao))
             {
-                await Shell.Current.DisplayAlert("Erro", "Por favor, preencha todos os campos, incluindo a Categoria.", "OK");
+                await Shell.Current.DisplayAlert("Erro", "Por favor, preencha o Título e a Descrição.", "OK");
                 return;
             }
 
-            var novoChamado = new Chamado
+            // 1. Cria o DTO que o Backend espera
+            var novoChamadoDto = new PIM4App.DTO.NovoChamadoDTO
             {
                 Titulo = this.Titulo,
                 Descricao = this.Descricao,
-                Categoria = this.CategoriaSelecionada // <-- ADICIONE ESTA LINHA
+                IdCategoria = 1 // SIMULADO: Vamos fingir que é sempre Categoria 1
             };
 
-            await _chamadoService.AbrirNovoChamadoAsync(novoChamado);
+            // 2. Chama o novo serviço (que usa HttpClient)
+            await _chamadoService.AbrirNovoChamadoAsync(novoChamadoDto);
 
             await Shell.Current.DisplayAlert("Sucesso!", "Seu chamado foi aberto.", "OK");
             await Shell.Current.GoToAsync("..");

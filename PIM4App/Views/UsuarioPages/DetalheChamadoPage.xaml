@@ -20,10 +20,10 @@
                       RowSpacing="5">
 
                     <Label Grid.Row="0" Grid.Column="0" Text="Categoria:" FontAttributes="Bold" />
-                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding Chamado.Categoria}" />
+                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding Chamado.IdCategoria, StringFormat='ID Categoria: {0}'}" />
 
                     <Label Grid.Row="1" Grid.Column="0" Text="Status:" FontAttributes="Bold" />
-                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding Chamado.Status}" />
+                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding Chamado.IdStatus, StringFormat='ID Status: {0}'}" />
 
                 </Grid>
             </Frame>

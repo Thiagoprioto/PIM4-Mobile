@@ -4,9 +4,11 @@ using PIM4App.Models;
 using PIM4App.Services;
 using PIM4App.Views;
 using System.Collections.ObjectModel;
+using System;
 
 namespace PIM4App.ViewModels
 {
+
     public partial class TecnicoDashboardViewModel : ObservableObject
     {
         private readonly IChamadoService _chamadoService;
@@ -14,19 +16,37 @@ namespace PIM4App.ViewModels
         [ObservableProperty]
         private ObservableCollection<Chamado> _todosChamados;
 
+        [ObservableProperty]
+        private bool _isBusy;
+
         public TecnicoDashboardViewModel(IChamadoService chamadoService)
         {
             _chamadoService = chamadoService;
             _todosChamados = new ObservableCollection<Chamado>();
-            // Removi o carregamento inicial daqui, pois o OnAppearing já vai fazer isso.
         }
 
         [RelayCommand]
         private async Task CarregarTodosChamadosAsync()
         {
-            var listaAtualizada = await _chamadoService.GetTodosChamadosAsync();
+            IsBusy = true;
+            try
+            {
+                var listaAtualizada = await _chamadoService.GetTodosChamadosAsync();
 
-            TodosChamados = new ObservableCollection<Chamado>(listaAtualizada);
+                TodosChamados.Clear();
+                foreach (var chamado in listaAtualizada)
+                {
+                    TodosChamados.Add(chamado);
+                }
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Erro", $"Falha ao carregar todos os chamados: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         [RelayCommand]

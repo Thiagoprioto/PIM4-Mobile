@@ -1,33 +1,65 @@
-﻿using PIM4App.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PIM4App.DTO;
+using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace PIM4App.Services
 {
     public class AuthService : IAuthService
     {
-        public async Task<string> LoginAsync(string username, string password)
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        // A URL do seu backend
+        private const string BACKEND_API_URL = "http://10.0.2.2:5043";
+
+        private readonly JsonSerializerOptions _jsonOptions;
+
+        public AuthService(IHttpClientFactory httpClientFactory)
         {
-            // SIMULAÇÃO: No seu PIM real, isso viria da API ASP.NET
-            await Task.Delay(1000); // Simula espera da rede
+            _httpClientFactory = httpClientFactory;
+            _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        }
 
-            // Login de USUÁRIO comum
-            if (username.ToLower() == "aluno" && password == "12345")
+        public async Task<LoginResponseDTO> LoginAsync(string email, string password)
+        {
+            try
             {
-                return "Usuario";
-            }
+                var client = _httpClientFactory.CreateClient();
+                string apiUrl = $"{BACKEND_API_URL}/api/auth/login";
 
-            // Login de TÉCNICO
-            if (username.ToLower() == "tecnico" && password == "admin")
+                var request = new LoginRequestDTO { Email = email, Senha = password };
+                HttpResponseMessage response = await client.PostAsJsonAsync(apiUrl, request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponseDTO>(_jsonOptions);
+
+                    if (loginResponse != null && !string.IsNullOrEmpty(loginResponse.Token))
+                    {
+                        // ==========================================================
+                        // SALVANDO O TOKEN E O PERFIL NO "COFRE" DO CELULAR
+                        // ==========================================================
+                        await SecureStorage.Default.SetAsync("auth_token", loginResponse.Token);
+                        await SecureStorage.Default.SetAsync("user_perfil", loginResponse.Perfil);
+                        await SecureStorage.Default.SetAsync("user_nome", loginResponse.Nome);
+                    }
+                    return loginResponse;
+                }
+                return null; // Login falhou (senha errada)
+            }
+            catch (Exception ex)
             {
-                return "Tecnico";
+                Console.WriteLine($"Erro no login: {ex.Message}");
+                return null; // Erro de rede (API desligada)
             }
+        }
 
-            // Login falhou
-            return null;
+        public async Task LogoutAsync()
+        {
+            // Limpa o "cofre"
+            SecureStorage.Default.Remove("auth_token");
+            SecureStorage.Default.Remove("user_perfil");
+            SecureStorage.Default.Remove("user_nome");
+            await Task.CompletedTask;
         }
     }
 }

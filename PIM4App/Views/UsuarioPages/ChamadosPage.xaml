@@ -27,8 +27,8 @@
 
                         <VerticalStackLayout Spacing="5">
                             <Label Text="{Binding Titulo}" FontSize="18" FontAttributes="Bold" />
-                            <Label Text="{Binding Categoria}" FontAttributes="Italic" TextColor="DarkSlateGray" FontSize="14"/>
-                            <Label Text="{Binding Status, StringFormat='Status: {0}'}" />
+                            <Label Text="{Binding IdCategoria, StringFormat='Categoria ID: {0}'}" FontAttributes="Italic" TextColor="DarkSlateGray" FontSize="14"/>
+                            <Label Text="{Binding IdStatus, StringFormat='Status ID: {0}'}" />
                             <Label Text="{Binding DataAbertura, StringFormat='Aberto em: {0:dd/MM/yyyy}'}" FontSize="12" TextColor="Gray" />
                         </VerticalStackLayout>
                     </Frame>

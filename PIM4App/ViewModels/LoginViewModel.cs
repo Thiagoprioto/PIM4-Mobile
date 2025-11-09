@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PIM4App.Services;
-using PIM4App.Views; // Necessário para saber o nome das páginas de destino
+using PIM4App.Views; // Para o nome das páginas
 
 namespace PIM4App.ViewModels
 {
@@ -10,39 +10,42 @@ namespace PIM4App.ViewModels
         private readonly IAuthService _authService;
 
         [ObservableProperty]
-        private string _username;
+        private string _username; // (O XAML está ligado nisto, mas vamos usar como Email)
 
         [ObservableProperty]
         private string _password;
+
+        [ObservableProperty]
+        private bool _isBusy; // Para mostrar um "carregando"
 
         public LoginViewModel(IAuthService authService)
         {
             _authService = authService;
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(IsNotBusy))]
         private async Task LoginAsync()
         {
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
-                await Shell.Current.DisplayAlert("Erro", "Por favor, preencha o usuário e a senha.", "OK");
+                await Shell.Current.DisplayAlert("Erro", "Por favor, preencha o e-mail e a senha.", "OK");
                 return;
             }
 
+            IsBusy = true;
             try
             {
-                string perfilUsuario = await _authService.LoginAsync(Username, Password);
+                var loginResponse = await _authService.LoginAsync(Username, Password);
 
-                if (perfilUsuario != null)
+                if (loginResponse != null)
                 {
-                    if (perfilUsuario == "Tecnico")
+                    // Roteamento baseado no Perfil (vindo da API)
+                    if (loginResponse.Perfil == "Tecnico")
                     {
-                        // PORTA 1: Só para Técnicos
                         await Shell.Current.GoToAsync($"//{nameof(TecnicoDashboardPage)}");
                     }
-                    else
+                    else // ("Colaborador" ou qualquer outro)
                     {
-                        // PORTA 2: Para todos os outros (Alunos/Colaboradores)
                         await Shell.Current.GoToAsync("//MainAppTabs");
                     }
                 }
@@ -53,8 +56,14 @@ namespace PIM4App.ViewModels
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Erro", $"Ocorreu um erro: {ex.Message}", "OK");
+                await Shell.Current.DisplayAlert("Erro de Conexão", $"Não foi possível conectar ao servidor: {ex.Message}", "OK");
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
+
+        private bool IsNotBusy() => !IsBusy;
     }
 }
