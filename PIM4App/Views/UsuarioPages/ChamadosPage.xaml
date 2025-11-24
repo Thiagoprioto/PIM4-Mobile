@@ -3,45 +3,100 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:PIM4App.ViewModels"
              xmlns:model="clr-namespace:PIM4App.Models"
+             xmlns:converters="clr-namespace:PIM4App.Converters"
              x:DataType="vm:ChamadosViewModel"
              x:Class="PIM4App.Views.ChamadosPage"
-             Title="Meus Chamados">
+             Title="Meus Chamados"
+             BackgroundColor="#f4f4f9">
+
+    <!-- RECURSOS DA PÁGINA: Importando os Conversores -->
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:StatusConverter x:Key="StatusConverter" />
+            <converters:StatusColorConverter x:Key="StatusColorConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="*, Auto">
 
-        <CollectionView Grid.Row="0"
-                        ItemsSource="{Binding Chamados}"
-                        EmptyView="Nenhum chamado encontrado."
-                        SelectionMode="Single"
-                        SelectionChangedCommand="{Binding SelecionarChamadoCommand}"
-                        SelectionChangedCommandParameter="{Binding Source={RelativeSource Self}, Path=SelectedItem}">
+        <!-- Lista de Chamados com Pull-to-Refresh -->
+        <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding CarregarChamadosCommand}" RefreshColor="#764dfc">
+            <CollectionView Grid.Row="0"
+                            ItemsSource="{Binding Chamados}"
+                            SelectionMode="None"
+                            EmptyView="Nenhum chamado encontrado.">
 
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="model:Chamado">
-                    <Frame Margin="10" Padding="15" CornerRadius="10" BorderColor="LightGray">
-                        <Frame.GestureRecognizers>
-                            <TapGestureRecognizer 
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ChamadosViewModel}}, Path=SelecionarChamadoCommand}"
-                                CommandParameter="{Binding .}" />
-                        </Frame.GestureRecognizers>
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+                </CollectionView.ItemsLayout>
 
-                        <VerticalStackLayout Spacing="5">
-                            <Label Text="{Binding Titulo}" FontSize="18" FontAttributes="Bold" />
-                            <Label Text="{Binding IdCategoria, StringFormat='Categoria ID: {0}'}" FontAttributes="Italic" TextColor="DarkSlateGray" FontSize="14"/>
-                            <Label Text="{Binding IdStatus, StringFormat='Status ID: {0}'}" />
-                            <Label Text="{Binding DataAbertura, StringFormat='Aberto em: {0:dd/MM/yyyy}'}" FontSize="12" TextColor="Gray" />
-                        </VerticalStackLayout>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                <!-- Cabeçalho da Lista -->
+                <CollectionView.Header>
+                    <Label Text="Recentes" FontAttributes="Bold" FontSize="18" TextColor="#311e6f" Margin="20,20,0,5"/>
+                </CollectionView.Header>
 
-        <HorizontalStackLayout Grid.Row="1" Padding="10" Spacing="10" HorizontalOptions="FillAndExpand">
-            <Button Text="Abrir Novo Chamado"
-                    Command="{Binding IrParaNovoChamadoCommand}"
-                    HorizontalOptions="FillAndExpand" />
-        </HorizontalStackLayout>
+                <!-- Espaço extra no final da lista -->
+                <CollectionView.Footer>
+                    <BoxView HeightRequest="80" Color="Transparent"/>
+                </CollectionView.Footer>
 
+                <!-- TEMPLATE DO ITEM (CARD DO CHAMADO) -->
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:Chamado">
+                        <Grid Padding="20,0">
+                            <Frame CornerRadius="15" Padding="0" HasShadow="True" BorderColor="Transparent" BackgroundColor="White">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ChamadosViewModel}}, Path=SelecionarChamadoCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Frame.GestureRecognizers>
+
+                                <Grid ColumnDefinitions="6, *">
+                                    <!-- Barra Lateral Colorida (Status) -->
+                                    <BoxView Grid.Column="0" Color="{Binding IdStatus, Converter={StaticResource StatusColorConverter}}" />
+
+                                    <VerticalStackLayout Grid.Column="1" Padding="15" Spacing="5">
+                                        <!-- Título -->
+                                        <Label Text="{Binding Titulo}" FontSize="16" FontAttributes="Bold" TextColor="#333" LineBreakMode="TailTruncation"/>
+
+                                        <!-- Descrição -->
+                                        <Label Text="{Binding Descricao}" FontSize="13" TextColor="#777" MaxLines="2" LineBreakMode="TailTruncation"/>
+
+                                        <!-- Rodapé do Card: Status e Data -->
+                                        <FlexLayout JustifyContent="SpaceBetween" AlignItems="Center" Margin="0,5,0,0">
+
+                                            <!-- Badge de Status com Texto e Cor dinâmicos -->
+                                            <Border StrokeShape="RoundRectangle 6" Padding="8,4" StrokeThickness="0" BackgroundColor="#F5F5F5">
+                                                <Label Text="{Binding IdStatus, Converter={StaticResource StatusConverter}}" 
+                                                       TextColor="{Binding IdStatus, Converter={StaticResource StatusColorConverter}}" 
+                                                       FontSize="11" FontAttributes="Bold"/>
+                                            </Border>
+
+                                            <!-- Data -->
+                                            <Label Text="{Binding DataAbertura, StringFormat='{0:dd/MM}'}" FontSize="12" TextColor="#999"/>
+                                        </FlexLayout>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Frame>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <!-- Botão Flutuante (FAB) -->
+        <Button Grid.Row="0" 
+                Text="+" 
+                FontSize="32"
+                Command="{Binding IrParaNovoChamadoCommand}"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="25"
+                WidthRequest="60"
+                HeightRequest="60"
+                CornerRadius="30"
+                Padding="0"
+                BackgroundColor="#ce3e99"
+                Shadow="{Shadow Brush=Black, Offset='2,4', Radius=6, Opacity=0.3}"/>
     </Grid>
-
 </ContentPage>

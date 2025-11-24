@@ -4,17 +4,17 @@
              xmlns:vm="clr-namespace:PIM4App.ViewModels"
              x:DataType="vm:LoginViewModel"
              x:Class="PIM4App.Views.LoginPage"
-             Title="Login - PIM 4">
+             Title="Help-Me">
 
     <VerticalStackLayout Padding="30" Spacing="10" VerticalOptions="Center">
 
         <Label Text="Sistema de Chamados" FontSize="24" HorizontalOptions="Center" />
         <Label Text="Acesso ao App Mobile" FontSize="16" HorizontalOptions="Center" Margin="0,0,0,20" />
 
-        <Entry Placeholder="Usuário (use: aluno)" 
+        <Entry Placeholder="Usuário (Usuario)" 
                Text="{Binding Username}" />
 
-        <Entry Placeholder="Senha (use: 12345)" 
+        <Entry Placeholder="Senha (Senha)" 
                Text="{Binding Password}" 
                IsPassword="True" />
 

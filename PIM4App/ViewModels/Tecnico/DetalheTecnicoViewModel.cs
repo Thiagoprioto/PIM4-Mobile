@@ -18,7 +18,6 @@ namespace PIM4App.ViewModels
         [ObservableProperty]
         private Chamado _chamado;
 
-        // Propriedade para a lista de COMENTÁRIOS
         [ObservableProperty]
         private ObservableCollection<InteracaoDTO> _interacoes;
 
@@ -26,9 +25,10 @@ namespace PIM4App.ViewModels
         private string _novoComentario;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsNotBusy))]
         private bool _isBusy;
 
-        // Removemos as propriedades de IA para limpar o código
+        public bool IsNotBusy => !IsBusy;
 
         public DetalheTecnicoViewModel(IChamadoService chamadoService)
         {
@@ -36,42 +36,33 @@ namespace PIM4App.ViewModels
             _interacoes = new ObservableCollection<InteracaoDTO>();
         }
 
-        // Chamado automaticamente quando o Chamado chega na página
         protected override void OnPropertyChanged(PropertyChangedEventArgs e)
         {
             base.OnPropertyChanged(e);
-
             if (e.PropertyName == nameof(Chamado) && Chamado != null)
             {
-                // Carrega os comentários quando o chamado é carregado
                 Task.Run(async () => await CarregarInteracoesAsync());
             }
         }
 
-        private bool IsNotBusy() => !IsBusy;
-
-        // ==========================================================
-        // COMANDOS DE COMENTÁRIO
-        // ==========================================================
-
-        [RelayCommand(CanExecute = nameof(IsNotBusy))]
+        [RelayCommand]
         private async Task CarregarInteracoesAsync()
         {
+            if (IsBusy) return;
             IsBusy = true;
             try
             {
-                // Chama o GET /api/Interacoes/1
                 var lista = await _chamadoService.GetInteracoesAsync(Chamado.IdChamado);
 
-                Interacoes.Clear();
-                foreach (var item in lista)
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    Interacoes.Add(item);
-                }
+                    Interacoes.Clear();
+                    foreach (var item in lista) Interacoes.Add(item);
+                });
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Erro Comentários", $"Falha ao carregar o histórico: {ex.Message}", "OK");
+                Console.WriteLine(ex.Message);
             }
             finally
             {
@@ -79,10 +70,10 @@ namespace PIM4App.ViewModels
             }
         }
 
-        [RelayCommand(CanExecute = nameof(IsNotBusy))]
+        [RelayCommand]
         private async Task AdicionarComentarioAsync()
         {
-            if (string.IsNullOrWhiteSpace(NovoComentario)) return;
+            if (string.IsNullOrWhiteSpace(NovoComentario) || IsBusy) return;
 
             IsBusy = true;
             try
@@ -93,19 +84,21 @@ namespace PIM4App.ViewModels
                     Mensagem = NovoComentario
                 };
 
-                // Envia para a API (POST /api/Interacoes)
-                var interacaoCriada = await _chamadoService.AdicionarInteracaoAsync(novaInteracao);
+                var criada = await _chamadoService.AdicionarInteracaoAsync(novaInteracao);
 
-                if (interacaoCriada != null)
+                if (criada != null)
                 {
-                    // Adiciona na lista visualmente imediatamente
-                    Interacoes.Add(interacaoCriada);
-                    NovoComentario = string.Empty; // Limpa a caixa
+                    Interacoes.Add(criada);
+                    NovoComentario = string.Empty;
+                }
+                else
+                {
+                    await Shell.Current.DisplayAlert("Erro", "Não foi possível enviar o comentário.", "OK");
                 }
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Erro Comentários", $"Falha ao adicionar: {ex.Message}", "OK");
+                await Shell.Current.DisplayAlert("Erro", ex.Message, "OK");
             }
             finally
             {
@@ -113,28 +106,68 @@ namespace PIM4App.ViewModels
             }
         }
 
-        [RelayCommand(CanExecute = nameof(IsNotBusy))]
+        [RelayCommand]
+        private async Task AssumirAsync()
+        {
+            if (IsBusy) return;
+            IsBusy = true;
+            try
+            {
+                await _chamadoService.AssumirChamadoAsync(Chamado.IdChamado);
+
+                Chamado.IdStatus = 2;
+                Chamado = new Chamado
+                {
+                    IdChamado = Chamado.IdChamado,
+                    Titulo = Chamado.Titulo,
+                    Descricao = Chamado.Descricao,
+                    IdCategoria = Chamado.IdCategoria,
+                    IdUsuarioSolicitante = Chamado.IdUsuarioSolicitante,
+                    DataAbertura = Chamado.DataAbertura,
+                    IdStatus = 2
+                };
+
+                await Shell.Current.DisplayAlert("Sucesso", "Você assumiu este chamado!", "OK");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Erro", ex.Message, "OK");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        [RelayCommand]
         private async Task FinalizarAsync()
         {
-            if (Chamado.IdStatus == 3)
-            {
-                await Shell.Current.DisplayAlert("Aviso", "Este chamado já está fechado.", "OK");
-                return;
-            }
+            if (IsBusy) return;
+
+            bool confirm = await Shell.Current.DisplayAlert("Confirmar", "Deseja realmente finalizar este chamado?", "Sim", "Não");
+            if (!confirm) return;
 
             IsBusy = true;
             try
             {
                 await _chamadoService.MudarStatusParaFinalizadoAsync(Chamado.IdChamado);
 
-                Chamado.IdStatus = 3;
-                OnPropertyChanged(nameof(Chamado));
+                Chamado = new Chamado
+                {
+                    IdChamado = Chamado.IdChamado,
+                    Titulo = Chamado.Titulo,
+                    Descricao = Chamado.Descricao,
+                    IdCategoria = Chamado.IdCategoria,
+                    IdUsuarioSolicitante = Chamado.IdUsuarioSolicitante,
+                    DataAbertura = Chamado.DataAbertura,
+                    IdStatus = 3
+                };
 
-                await Shell.Current.DisplayAlert("Sucesso", "Chamado finalizado.", "OK");
+                await Shell.Current.DisplayAlert("Sucesso", "Chamado finalizado com sucesso.", "OK");
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Erro", $"Falha ao finalizar chamado: {ex.Message}", "OK");
+                await Shell.Current.DisplayAlert("Erro", ex.Message, "OK");
             }
             finally
             {

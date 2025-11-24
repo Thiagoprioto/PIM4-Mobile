@@ -16,6 +16,12 @@
                         SelectedItem="{Binding CategoriaSelecionada}" />
             </Frame>
 
+            <Label Text="Prioridade:" Margin="0,15,0,0" />
+            <Frame Padding="0" CornerRadius="8" BorderColor="LightGray" HasShadow="False">
+                <Picker Title="Selecione uma prioridade..."
+                        ItemsSource="{Binding Prioridades}"
+                        SelectedItem="{Binding PrioridadeSelecionada}" />
+            </Frame>
             <Label Text="Título do Chamado:" Margin="0,15,0,0" />
             <Entry Placeholder="Ex: Impressora quebrada"
                    Text="{Binding Titulo}" />

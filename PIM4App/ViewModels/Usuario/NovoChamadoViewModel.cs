@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using PIM4App.Models;
 using PIM4App.Services;
 using PIM4App.DTO;
-using System.Collections.Generic; // <-- ADICIONE ESTE
+using System.Collections.Generic; // <-- Verifique se este using está presente
 
 namespace PIM4App.ViewModels
 {
@@ -23,6 +23,16 @@ namespace PIM4App.ViewModels
         [ObservableProperty]
         private string _categoriaSelecionada;
 
+        // ==========================================================
+        // 1. ADIÇÃO DAS PROPRIEDADES DE PRIORIDADE
+        // ==========================================================
+        public List<string> Prioridades { get; }
+
+        [ObservableProperty]
+        private string _prioridadeSelecionada;
+        // ==========================================================
+
+
         public NovoChamadoViewModel(IChamadoService chamadoService)
         {
             _chamadoService = chamadoService;
@@ -36,6 +46,15 @@ namespace PIM4App.ViewModels
                 "Dúvida",
                 "Solicitação de Software"
             };
+            // Define um valor padrão
+            CategoriaSelecionada = Categorias[0];
+
+
+            // ==========================================================
+            // 2. INICIALIZAÇÃO DA LISTA DE PRIORIDADES
+            // ==========================================================
+            Prioridades = new List<string> { "Baixa", "Média", "Alta", "Urgente" };
+            PrioridadeSelecionada = "Baixa"; // Define "Baixa" como padrão
         }
 
         [RelayCommand]
@@ -53,13 +72,26 @@ namespace PIM4App.ViewModels
             {
                 Titulo = this.Titulo,
                 Descricao = this.Descricao,
-                IdCategoria = 1 // SIMULADO: Vamos fingir que é sempre Categoria 1
+                IdCategoria = 1, // SIMULADO: (Troque isso pela lógica do Picker de Categoria quando o tiver)
+
+                // ==========================================================
+                // 3. ENVIO DA PRIORIDADE SELECIONADA
+                // ==========================================================
+                Prioridade = this.PrioridadeSelecionada
             };
 
-            // 2. Chama o novo serviço (que usa HttpClient)
+            // 2. Chama o serviço (que usa HttpClient)
             await _chamadoService.AbrirNovoChamadoAsync(novoChamadoDto);
 
             await Shell.Current.DisplayAlert("Sucesso!", "Seu chamado foi aberto.", "OK");
+
+            // Limpa os campos para um novo chamado
+            Titulo = string.Empty;
+            Descricao = string.Empty;
+            CategoriaSelecionada = Categorias[0];
+            PrioridadeSelecionada = Prioridades[0];
+
+            // Volta para a página anterior (lista de chamados)
             await Shell.Current.GoToAsync("..");
         }
     }

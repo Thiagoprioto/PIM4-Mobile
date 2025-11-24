@@ -6,7 +6,7 @@
         public int IdChamado { get; set; }
         public string? Titulo { get; set; }
         public string? Descricao { get; set; }
-        public int Prioridade { get; set; } // Corrigido para int
+        public string Prioridade { get; set; } // Corrigido para int
         public DateTime DataAbertura { get; set; }
         public DateTime? DataFechamento { get; set; }
         public int? IdCategoria { get; set; }

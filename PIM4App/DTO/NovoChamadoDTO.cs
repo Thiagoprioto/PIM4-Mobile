@@ -11,5 +11,8 @@
 
         [System.Text.Json.Serialization.JsonPropertyName("idCategoria")]
         public int IdCategoria { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("prioridade")]
+        public string? Prioridade { get; set; }
     }
 }

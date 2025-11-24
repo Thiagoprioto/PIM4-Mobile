@@ -10,7 +10,7 @@
         [System.Text.Json.Serialization.JsonPropertyName("descricao")]
         public string? Descricao { get; set; }
         [System.Text.Json.Serialization.JsonPropertyName("prioridade")]
-        public int Prioridade { get; set; } // Corrigido para int
+        public string Prioridade { get; set; } // Corrigido para int
         [System.Text.Json.Serialization.JsonPropertyName("dataAbertura")]
         public DateTime DataAbertura { get; set; }
         [System.Text.Json.Serialization.JsonPropertyName("dataFechamento")]
